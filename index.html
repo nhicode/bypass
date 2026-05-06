@@ -2,40 +2,111 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Pro Bypasser - Quyền Lực Thuộc Về Tôi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Pro Bypasser</title>
     <style>
-        body { font-family: -apple-system, sans-serif; background: #0f172a; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .box { background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 90%; max-width: 500px; text-align: center; }
-        input { width: 100%; padding: 15px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; margin-bottom: 15px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        button:hover { background: #2563eb; }
-        #result { margin-top: 20px; padding: 15px; background: #064e3b; border: 1px solid #059669; border-radius: 8px; display: none; word-wrap: break-word; }
-        a { color: #34d399; font-weight: bold; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: #0f172a; 
+            color: #f8fafc; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0; 
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .box { 
+            background: #1e293b; 
+            padding: 30px; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
+            width: 100%; 
+            max-width: 450px; 
+            text-align: center; 
+            box-sizing: border-box;
+        }
+        h2 { margin-top: 0; color: #3b82f6; }
+        input { 
+            width: 100%; 
+            padding: 15px; 
+            border-radius: 8px; 
+            border: 1px solid #334155; 
+            background: #0f172a; 
+            color: white; 
+            margin-bottom: 15px; 
+            box-sizing: border-box; 
+            font-size: 16px;
+            outline: none;
+        }
+        input:focus { border-color: #3b82f6; }
+        button { 
+            width: 100%; 
+            padding: 15px; 
+            background: #2563eb; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            font-size: 16px;
+            cursor: pointer; 
+            transition: 0.3s;
+        }
+        button:hover { background: #1d4ed8; }
+        button:disabled { background: #475569; cursor: not-allowed; }
+        #result { 
+            margin-top: 20px; 
+            padding: 15px; 
+            border-radius: 8px; 
+            display: none; 
+            word-wrap: break-word; 
+            text-align: left;
+        }
+        .success { background: #064e3b; border: 1px solid #059669; }
+        .error { background: #7f1d1d; border: 1px solid #b91c1c; }
+        #method { font-size: 12px; margin-bottom: 5px; font-weight: bold; }
+        .success #method { color: #a7f3d0; }
+        .error #method { color: #fca5a5; }
+        a { color: #60a5fa; font-weight: bold; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .text-err { color: #fecaca; font-size: 14px; }
     </style>
 </head>
 <body>
     <div class="box">
-        <h2>🚀 Trạm Khử Link (Tự Code)</h2>
-        <input type="url" id="link" placeholder="Dán link vào đây...">
-        <button id="btn">Phá Link</button>
+        <h2>⚡ Tool Bypasser</h2>
+        <input type="url" id="link" placeholder="Dán link cần bypass vào đây..." autocomplete="off">
+        <button id="btn">Tiến Hành Phá Link</button>
+        
         <div id="result">
-            <div style="font-size: 12px; color: #a7f3d0;" id="method"></div>
+            <div id="method"></div>
             <a id="output" href="#" target="_blank"></a>
+            <span id="errOutput" class="text-err"></span>
         </div>
     </div>
 
     <script>
         document.getElementById('btn').addEventListener('click', async () => {
-            const url = document.getElementById('link').value;
+            const url = document.getElementById('link').value.trim();
+            if (!url) return;
+
             const btn = document.getElementById('btn');
             const resBox = document.getElementById('result');
+            const outputLink = document.getElementById('output');
+            const errOutput = document.getElementById('errOutput');
+            const methodText = document.getElementById('method');
             
+            btn.disabled = true;
             btn.innerText = "Đang xử lý...";
             resBox.style.display = 'none';
+            resBox.className = '';
+            outputLink.innerText = '';
+            errOutput.innerText = '';
 
             try {
-                // Gọi vào API Node.js của chính bạn!
+                // Sử dụng đường dẫn tương đối để Frontend tự tìm Backend trên cùng 1 server
                 const res = await fetch('/api/bypass', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -45,20 +116,29 @@
                 
                 resBox.style.display = 'block';
                 if (data.success) {
-                    resBox.style.background = '#064e3b';
-                    document.getElementById('method').innerText = `Thuật toán: ${data.method}`;
-                    document.getElementById('output').innerText = data.result;
-                    document.getElementById('output').href = data.result;
+                    resBox.classList.add('success');
+                    methodText.innerText = `✅ Thành công (${data.method})`;
+                    outputLink.innerText = data.result;
+                    outputLink.href = data.result;
+                    outputLink.style.display = 'inline';
+                    errOutput.style.display = 'none';
                 } else {
-                    resBox.style.background = '#7f1d1d';
-                    document.getElementById('method').innerText = "Thất bại!";
-                    document.getElementById('output').innerText = data.message;
-                    document.getElementById('output').removeAttribute('href');
+                    resBox.classList.add('error');
+                    methodText.innerText = "❌ Thất bại";
+                    errOutput.innerText = data.message;
+                    errOutput.style.display = 'inline';
+                    outputLink.style.display = 'none';
                 }
             } catch (e) {
-                alert("Lỗi kết nối đến Server của bạn!");
+                resBox.style.display = 'block';
+                resBox.classList.add('error');
+                methodText.innerText = "❌ Lỗi Hệ Thống";
+                errOutput.innerText = "Lỗi kết nối API: " + e.message;
+                errOutput.style.display = 'inline';
+                outputLink.style.display = 'none';
             } finally {
-                btn.innerText = "Phá Link";
+                btn.disabled = false;
+                btn.innerText = "Tiến Hành Phá Link";
             }
         });
     </script>
