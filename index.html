@@ -3,87 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BMad Link Bypasser - GitHub Version</title>
+    <title>My Pro Bypasser - Quyền Lực Thuộc Về Tôi</title>
     <style>
-        /* Giao diện Dark Theme chuyên nghiệp */
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d1117; color: #c9d1d9; display: flex; align-items: center; justify-content: center; height: 100vh; }
-        .app-container { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 40px; width: 100%; max-width: 450px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); text-align: center; }
-        h2 { color: #58a6ff; margin-top: 0; }
-        p { color: #8b949e; font-size: 14px; margin-bottom: 25px; }
-        input { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #30363d; background-color: #0d1117; color: #c9d1d9; box-sizing: border-box; outline: none; transition: border 0.2s; }
-        input:focus { border-color: #58a6ff; }
-        button { width: 100%; padding: 14px; background-color: #238636; color: white; font-weight: bold; font-size: 16px; border: none; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
-        button:hover { background-color: #2ea043; }
-        button:disabled { background-color: #21262d; color: #8b949e; cursor: not-allowed; }
-        .result-box { margin-top: 20px; padding: 15px; border-radius: 6px; display: none; word-wrap: break-word; font-size: 14px; }
-        .success { background-color: rgba(46, 160, 67, 0.15); border: 1px solid rgba(46, 160, 67, 0.4); }
-        .success a { color: #58a6ff; text-decoration: none; font-weight: bold; }
-        .error { background-color: rgba(248, 81, 73, 0.1); border: 1px solid rgba(248, 81, 73, 0.4); color: #ff7b72; }
+        body { font-family: -apple-system, sans-serif; background: #0f172a; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .box { background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 90%; max-width: 500px; text-align: center; }
+        input { width: 100%; padding: 15px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; margin-bottom: 15px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        button:hover { background: #2563eb; }
+        #result { margin-top: 20px; padding: 15px; background: #064e3b; border: 1px solid #059669; border-radius: 8px; display: none; word-wrap: break-word; }
+        a { color: #34d399; font-weight: bold; }
     </style>
 </head>
 <body>
-
-<div class="app-container">
-    <h2>⚡ BMad Link Bypasser</h2>
-    <p>Hỗ trợ vượt link rút gọn và bóc tách URL mã hóa.</p>
-    
-    <input type="text" id="urlInput" placeholder="Dán liên kết cần vượt vào đây..." autocomplete="off">
-    <button id="submitBtn">Phân Tích Link</button>
-
-    <div id="resultBox" class="result-box">
-        <span id="resultText"></span><br>
-        <a id="resultLink" href="#" target="_blank"></a>
+    <div class="box">
+        <h2>🚀 Trạm Khử Link (Tự Code)</h2>
+        <input type="url" id="link" placeholder="Dán link vào đây...">
+        <button id="btn">Phá Link</button>
+        <div id="result">
+            <div style="font-size: 12px; color: #a7f3d0;" id="method"></div>
+            <a id="output" href="#" target="_blank"></a>
+        </div>
     </div>
-</div>
 
-<script>
-    document.getElementById('submitBtn').addEventListener('click', async () => {
-        const url = document.getElementById('urlInput').value.trim();
-        if (!url) return;
-
-        const btn = document.getElementById('submitBtn');
-        const box = document.getElementById('resultBox');
-        const rText = document.getElementById('resultText');
-        const rLink = document.getElementById('resultLink');
-
-        // Giao diện chờ
-        btn.disabled = true;
-        btn.innerText = "Đang kết nối Server...";
-        box.style.display = 'none';
-        box.className = 'result-box';
-        rLink.innerText = '';
-        rLink.href = '#';
-
-        try {
-            const response = await fetch('/api/bypass', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url })
-            });
+    <script>
+        document.getElementById('btn').addEventListener('click', async () => {
+            const url = document.getElementById('link').value;
+            const btn = document.getElementById('btn');
+            const resBox = document.getElementById('result');
             
-            const data = await response.json();
+            btn.innerText = "Đang xử lý...";
+            resBox.style.display = 'none';
 
-            box.style.display = 'block';
-            if (data.success) {
-                box.classList.add('success');
-                rText.innerHTML = `Thành công! Phương pháp: <i>${data.method}</i>`;
-                rText.style.color = '#3fb950';
-                rLink.href = data.result;
-                rLink.innerText = data.result;
-            } else {
-                box.classList.add('error');
-                rText.innerText = `Thất bại: ${data.message}`;
+            try {
+                // Gọi vào API Node.js của chính bạn!
+                const res = await fetch('/api/bypass', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                const data = await res.json();
+                
+                resBox.style.display = 'block';
+                if (data.success) {
+                    resBox.style.background = '#064e3b';
+                    document.getElementById('method').innerText = `Thuật toán: ${data.method}`;
+                    document.getElementById('output').innerText = data.result;
+                    document.getElementById('output').href = data.result;
+                } else {
+                    resBox.style.background = '#7f1d1d';
+                    document.getElementById('method').innerText = "Thất bại!";
+                    document.getElementById('output').innerText = data.message;
+                    document.getElementById('output').removeAttribute('href');
+                }
+            } catch (e) {
+                alert("Lỗi kết nối đến Server của bạn!");
+            } finally {
+                btn.innerText = "Phá Link";
             }
-        } catch (error) {
-            box.style.display = 'block';
-            box.classList.add('error');
-            rText.innerText = "Lỗi mạng: Không thể gọi API Server.";
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "Phân Tích Link";
-        }
-    });
-</script>
-
+        });
+    </script>
 </body>
 </html>
