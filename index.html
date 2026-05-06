@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Pro Bypasser</title>
+    <title>BMad Bypasser (Bản Độc Lập)</title>
     <style>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
@@ -13,7 +13,7 @@
             flex-direction: column; 
             align-items: center; 
             justify-content: center; 
-            height: 100vh; 
+            min-height: 100vh; 
             margin: 0; 
             padding: 20px;
             box-sizing: border-box;
@@ -25,10 +25,9 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
             width: 100%; 
             max-width: 450px; 
-            text-align: center; 
             box-sizing: border-box;
         }
-        h2 { margin-top: 0; color: #3b82f6; }
+        h2 { margin-top: 0; color: #3b82f6; text-align: center; }
         input { 
             width: 100%; 
             padding: 15px; 
@@ -62,28 +61,26 @@
             border-radius: 8px; 
             display: none; 
             word-wrap: break-word; 
-            text-align: left;
         }
         .success { background: #064e3b; border: 1px solid #059669; }
         .error { background: #7f1d1d; border: 1px solid #b91c1c; }
         #method { font-size: 12px; margin-bottom: 5px; font-weight: bold; }
         .success #method { color: #a7f3d0; }
         .error #method { color: #fca5a5; }
-        a { color: #60a5fa; font-weight: bold; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        .text-err { color: #fecaca; font-size: 14px; }
+        a.out-link { color: #60a5fa; font-weight: bold; text-decoration: none; display: block; margin-top: 5px;}
+        a.out-link:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
     <div class="box">
-        <h2>⚡ Tool Bypasser</h2>
+        <h2>⚡ Tool Bypasser (No Server)</h2>
         <input type="url" id="link" placeholder="Dán link cần bypass vào đây..." autocomplete="off">
-        <button id="btn">Tiến Hành Phá Link</button>
+        <button id="btn">Phân Tích Link</button>
         
         <div id="result">
             <div id="method"></div>
-            <a id="output" href="#" target="_blank"></a>
-            <span id="errOutput" class="text-err"></span>
+            <a id="output" class="out-link" href="#" target="_blank"></a>
+            <span id="errOutput" style="font-size: 14px; color: #fecaca;"></span>
         </div>
     </div>
 
@@ -99,46 +96,100 @@
             const methodText = document.getElementById('method');
             
             btn.disabled = true;
-            btn.innerText = "Đang xử lý...";
+            btn.innerText = "Đang xử lý thuật toán...";
             resBox.style.display = 'none';
             resBox.className = '';
             outputLink.innerText = '';
             errOutput.innerText = '';
 
             try {
-                // Sử dụng đường dẫn tương đối để Frontend tự tìm Backend trên cùng 1 server
-                const res = await fetch('/api/bypass', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url })
-                });
-                const data = await res.json();
-                
+                let finalUrl = null;
+                let usedMethod = "";
+
+                const parsedUrl = new URL(url);
+
+                // =====================================
+                // THUẬT TOÁN 1: GIẢI MÃ THAM SỐ URL
+                // =====================================
+                const paramsToScan = ['url', 'link', 'dest', 'target', 'id'];
+                for (let param of paramsToScan) {
+                    let target = parsedUrl.searchParams.get(param);
+                    if (target) {
+                        try {
+                            let decoded = atob(target); // Giải mã Base64
+                            if (decoded.startsWith('http')) {
+                                finalUrl = decoded;
+                                usedMethod = "Base64 Decode";
+                                break;
+                            }
+                        } catch (e) {}
+                        
+                        let decodedUrl = decodeURIComponent(target);
+                        if (decodedUrl.startsWith('http')) {
+                            finalUrl = decodedUrl;
+                            usedMethod = "URL Decode";
+                            break;
+                        }
+                    }
+                }
+
+                // =====================================
+                // THUẬT TOÁN 2: CÀO HTML QUA CORS PROXY
+                // =====================================
+                if (!finalUrl) {
+                    btn.innerText = "Đang quét mã nguồn web...";
+                    // Sử dụng AllOrigins để vượt rào CORS chặn của trình duyệt
+                    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+                    const response = await fetch(proxyUrl);
+                    const data = await response.json();
+                    
+                    if (data.contents) {
+                        const html = data.contents;
+                        
+                        // Tìm link trong thẻ <meta http-equiv="refresh">
+                        const metaMatch = html.match(/<meta[^>]*http-equiv=["']?refresh["']?[^>]*content=["']?[^"']*url=([^"'>]+)["']?/i);
+                        if (metaMatch && metaMatch[1]) {
+                            finalUrl = metaMatch[1].replace(/['"]/g, '').trim();
+                            usedMethod = "Cào thẻ Meta Refresh";
+                        } 
+                        else {
+                            // Tìm link trong các thẻ a có class báo hiệu
+                            const aMatch = html.match(/<a[^>]*class=["'][^"']*(?:skip|btn|continue)[^"']*["'][^>]*href=["'](http[^"']+)["']/i);
+                            if (aMatch && aMatch[1]) {
+                                finalUrl = aMatch[1];
+                                usedMethod = "Cào nút Skip/Continue";
+                            }
+                        }
+                    }
+                }
+
+                // Hiển thị kết quả
                 resBox.style.display = 'block';
-                if (data.success) {
+                if (finalUrl) {
                     resBox.classList.add('success');
-                    methodText.innerText = `✅ Thành công (${data.method})`;
-                    outputLink.innerText = data.result;
-                    outputLink.href = data.result;
-                    outputLink.style.display = 'inline';
+                    methodText.innerText = `✅ Bypassed (${usedMethod})`;
+                    outputLink.innerText = finalUrl;
+                    outputLink.href = finalUrl;
+                    outputLink.style.display = 'block';
                     errOutput.style.display = 'none';
                 } else {
                     resBox.classList.add('error');
                     methodText.innerText = "❌ Thất bại";
-                    errOutput.innerText = data.message;
+                    errOutput.innerText = "Không tìm thấy link thật. Trang này có bảo mật cao hoặc thuật toán chưa hỗ trợ.";
                     errOutput.style.display = 'inline';
                     outputLink.style.display = 'none';
                 }
+
             } catch (e) {
                 resBox.style.display = 'block';
                 resBox.classList.add('error');
-                methodText.innerText = "❌ Lỗi Hệ Thống";
-                errOutput.innerText = "Lỗi kết nối API: " + e.message;
+                methodText.innerText = "❌ Lỗi Thuật Toán";
+                errOutput.innerText = e.message;
                 errOutput.style.display = 'inline';
                 outputLink.style.display = 'none';
             } finally {
                 btn.disabled = false;
-                btn.innerText = "Tiến Hành Phá Link";
+                btn.innerText = "Phân Tích Link";
             }
         });
     </script>
