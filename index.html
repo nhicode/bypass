@@ -3,65 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BMad Bypasser (Bản Độc Lập)</title>
+    <title>BMad Bypasser (Bản Chống Chặn)</title>
     <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background: #0f172a; 
-            color: #f8fafc; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            min-height: 100vh; 
-            margin: 0; 
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .box { 
-            background: #1e293b; 
-            padding: 30px; 
-            border-radius: 16px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
-            width: 100%; 
-            max-width: 450px; 
-            box-sizing: border-box;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        .box { background: #1e293b; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 100%; max-width: 450px; box-sizing: border-box; }
         h2 { margin-top: 0; color: #3b82f6; text-align: center; }
-        input { 
-            width: 100%; 
-            padding: 15px; 
-            border-radius: 8px; 
-            border: 1px solid #334155; 
-            background: #0f172a; 
-            color: white; 
-            margin-bottom: 15px; 
-            box-sizing: border-box; 
-            font-size: 16px;
-            outline: none;
-        }
+        input { width: 100%; padding: 15px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; outline: none; }
         input:focus { border-color: #3b82f6; }
-        button { 
-            width: 100%; 
-            padding: 15px; 
-            background: #2563eb; 
-            color: white; 
-            border: none; 
-            border-radius: 8px; 
-            font-weight: bold; 
-            font-size: 16px;
-            cursor: pointer; 
-            transition: 0.3s;
-        }
+        button { width: 100%; padding: 15px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; }
         button:hover { background: #1d4ed8; }
         button:disabled { background: #475569; cursor: not-allowed; }
-        #result { 
-            margin-top: 20px; 
-            padding: 15px; 
-            border-radius: 8px; 
-            display: none; 
-            word-wrap: break-word; 
-        }
+        #result { margin-top: 20px; padding: 15px; border-radius: 8px; display: none; word-wrap: break-word; }
         .success { background: #064e3b; border: 1px solid #059669; }
         .error { background: #7f1d1d; border: 1px solid #b91c1c; }
         #method { font-size: 12px; margin-bottom: 5px; font-weight: bold; }
@@ -85,6 +37,32 @@
     </div>
 
     <script>
+        // Hàm này sẽ cố gắng dùng nhiều Proxy khác nhau để vượt tường lửa iOS
+        async function fetchHtmlWithFallback(targetUrl) {
+            const encodedUrl = encodeURIComponent(targetUrl);
+            const proxies = [
+                `https://api.codetabs.com/v1/proxy?quest=${encodedUrl}`,
+                `https://corsproxy.io/?${encodedUrl}`,
+                `https://api.allorigins.win/raw?url=${encodedUrl}`
+            ];
+
+            let lastError = "";
+
+            for (let i = 0; i < proxies.length; i++) {
+                try {
+                    console.log(`Đang thử Proxy số ${i + 1}...`);
+                    const res = await fetch(proxies[i]);
+                    if (res.ok) {
+                        return await res.text(); // Trả về mã HTML thô
+                    }
+                } catch (e) {
+                    console.warn(`Proxy ${i + 1} thất bại:`, e.message);
+                    lastError = e.message;
+                }
+            }
+            throw new Error(`Tất cả Proxy đều bị Safari chặn (Lỗi: ${lastError}). Vui lòng xem lưu ý bên dưới!`);
+        }
+
         document.getElementById('btn').addEventListener('click', async () => {
             const url = document.getElementById('link').value.trim();
             if (!url) return;
@@ -96,7 +74,7 @@
             const methodText = document.getElementById('method');
             
             btn.disabled = true;
-            btn.innerText = "Đang xử lý thuật toán...";
+            btn.innerText = "Đang quét mã nguồn...";
             resBox.style.display = 'none';
             resBox.className = '';
             outputLink.innerText = '';
@@ -105,65 +83,40 @@
             try {
                 let finalUrl = null;
                 let usedMethod = "";
-
                 const parsedUrl = new URL(url);
 
-                // =====================================
-                // THUẬT TOÁN 1: GIẢI MÃ THAM SỐ URL
-                // =====================================
+                // 1. THUẬT TOÁN: GIẢI MÃ THAM SỐ
                 const paramsToScan = ['url', 'link', 'dest', 'target', 'id'];
                 for (let param of paramsToScan) {
                     let target = parsedUrl.searchParams.get(param);
                     if (target) {
                         try {
-                            let decoded = atob(target); // Giải mã Base64
-                            if (decoded.startsWith('http')) {
-                                finalUrl = decoded;
-                                usedMethod = "Base64 Decode";
-                                break;
-                            }
+                            let decoded = atob(target); 
+                            if (decoded.startsWith('http')) { finalUrl = decoded; usedMethod = "Base64 Decode"; break; }
                         } catch (e) {}
                         
                         let decodedUrl = decodeURIComponent(target);
-                        if (decodedUrl.startsWith('http')) {
-                            finalUrl = decodedUrl;
-                            usedMethod = "URL Decode";
-                            break;
-                        }
+                        if (decodedUrl.startsWith('http')) { finalUrl = decodedUrl; usedMethod = "URL Decode"; break; }
                     }
                 }
 
-                // =====================================
-                // THUẬT TOÁN 2: CÀO HTML QUA CORS PROXY
-                // =====================================
+                // 2. THUẬT TOÁN: CÀO HTML QUA CORS PROXY
                 if (!finalUrl) {
-                    btn.innerText = "Đang quét mã nguồn web...";
-                    // Sử dụng AllOrigins để vượt rào CORS chặn của trình duyệt
-                    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-                    const response = await fetch(proxyUrl);
-                    const data = await response.json();
+                    const html = await fetchHtmlWithFallback(url);
                     
-                    if (data.contents) {
-                        const html = data.contents;
-                        
-                        // Tìm link trong thẻ <meta http-equiv="refresh">
-                        const metaMatch = html.match(/<meta[^>]*http-equiv=["']?refresh["']?[^>]*content=["']?[^"']*url=([^"'>]+)["']?/i);
-                        if (metaMatch && metaMatch[1]) {
-                            finalUrl = metaMatch[1].replace(/['"]/g, '').trim();
-                            usedMethod = "Cào thẻ Meta Refresh";
-                        } 
-                        else {
-                            // Tìm link trong các thẻ a có class báo hiệu
-                            const aMatch = html.match(/<a[^>]*class=["'][^"']*(?:skip|btn|continue)[^"']*["'][^>]*href=["'](http[^"']+)["']/i);
-                            if (aMatch && aMatch[1]) {
-                                finalUrl = aMatch[1];
-                                usedMethod = "Cào nút Skip/Continue";
-                            }
+                    const metaMatch = html.match(/<meta[^>]*http-equiv=["']?refresh["']?[^>]*content=["']?[^"']*url=([^"'>]+)["']?/i);
+                    if (metaMatch && metaMatch[1]) {
+                        finalUrl = metaMatch[1].replace(/['"]/g, '').trim();
+                        usedMethod = "Cào thẻ Meta Refresh";
+                    } else {
+                        const aMatch = html.match(/<a[^>]*class=["'][^"']*(?:skip|btn|continue)[^"']*["'][^>]*href=["'](http[^"']+)["']/i);
+                        if (aMatch && aMatch[1]) {
+                            finalUrl = aMatch[1];
+                            usedMethod = "Cào nút Skip/Continue";
                         }
                     }
                 }
 
-                // Hiển thị kết quả
                 resBox.style.display = 'block';
                 if (finalUrl) {
                     resBox.classList.add('success');
@@ -175,7 +128,7 @@
                 } else {
                     resBox.classList.add('error');
                     methodText.innerText = "❌ Thất bại";
-                    errOutput.innerText = "Không tìm thấy link thật. Trang này có bảo mật cao hoặc thuật toán chưa hỗ trợ.";
+                    errOutput.innerText = "Không tìm thấy link thật trong mã HTML. Web có Cloudflare chặn quá rát.";
                     errOutput.style.display = 'inline';
                     outputLink.style.display = 'none';
                 }
@@ -183,7 +136,7 @@
             } catch (e) {
                 resBox.style.display = 'block';
                 resBox.classList.add('error');
-                methodText.innerText = "❌ Lỗi Thuật Toán";
+                methodText.innerText = "❌ Lỗi Mạng/Thuật Toán";
                 errOutput.innerText = e.message;
                 errOutput.style.display = 'inline';
                 outputLink.style.display = 'none';
