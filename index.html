@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Khung vẽ hình nền động bằng Script JS -->
     <canvas id="bg-canvas"></canvas>
 
     <div class="container">
@@ -24,7 +23,6 @@
         </main>
     </div>
 
-    <!-- Bảng Đăng Nhập -->
     <div class="modal-overlay" id="login-modal">
         <div class="modal-content">
             <button class="btn-close" onclick="closeModals()">×</button>
@@ -36,7 +34,6 @@
         </div>
     </div>
 
-    <!-- Bảng Đăng Code -->
     <div class="modal-overlay" id="post-modal">
         <div class="modal-content">
             <button class="btn-close" onclick="closeModals()">×</button>
@@ -91,7 +88,6 @@
             ctx.clearRect(0, 0, width, height);
             orbs.forEach(orb => {
                 orb.x += orb.dx; orb.y += orb.dy;
-                // Bật lại nếu đập viền
                 if (orb.x < -orb.r || orb.x > width + orb.r) orb.dx *= -1;
                 if (orb.y < -orb.r || orb.y > height + orb.r) orb.dy *= -1;
 
@@ -123,11 +119,11 @@
                         const article = document.createElement("article");
                         article.className = "post";
                         article.innerHTML = `
-                            <div class="post-header">
+                            <div class="post-header" onclick="toggleCode(this)">
                                 <h2>${post.title}</h2>
                                 <div class="action-group">
-                                    <button class="toggle-btn" onclick="toggleCode(this)">Xem Script</button>
-                                    <button class="copy-btn" data-code="${encodeURIComponent(post.content)}">Copy</button>
+                                    <span style="font-size: 0.8rem; color: #515154; margin-right: 5px;">Click</span>
+                                    <button class="copy-btn" data-code="${encodeURIComponent(post.content)}" onclick="event.stopPropagation();">Copy</button>
                                 </div>
                             </div>
                             <div class="code-content">
@@ -140,7 +136,9 @@
                     Prism.highlightAll();
 
                     document.querySelectorAll(".copy-btn").forEach(btn => {
-                        btn.addEventListener("click", function() {
+                        btn.addEventListener("click", function(e) {
+                            // Ngăn sự kiện click lan ra ngoài làm header bị click
+                            e.stopPropagation();
                             const code = decodeURIComponent(this.getAttribute("data-code"));
                             navigator.clipboard.writeText(code).then(() => {
                                 const old = this.innerText;
@@ -164,15 +162,14 @@
             return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
         }
 
-        // Script Mở/Đóng code
-        function toggleCode(btn) {
-            const codeBlock = btn.closest('.post').querySelector('.code-content');
+        // Script Mở/Đóng code (Sửa lỗi nhận vào header)
+        function toggleCode(header) {
+            // Tìm codeBlock từ header cha
+            const codeBlock = header.closest('.post').querySelector('.code-content');
             if (codeBlock.classList.contains('show')) {
                 codeBlock.classList.remove('show');
-                btn.innerText = "Xem Script";
             } else {
                 codeBlock.classList.add('show');
-                btn.innerText = "Thu Gọn";
             }
         }
 
