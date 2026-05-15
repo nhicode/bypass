@@ -3,26 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Code Vault</title>
+    <title>Kho Script Của Admin</title>
+    <!-- Giao diện tối tô màu code -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="style.css">
+    <style>
+        :root { --bg: #0d1117; --text: #c9d1d9; --card: #161b22; --border: #30363d; --accent: #58a6ff; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 20px; line-height: 1.6; max-width: 800px; margin: auto; }
+        header { text-align: center; border-bottom: 1px solid var(--border); margin-bottom: 20px; padding-bottom: 10px; }
+        h1 { color: var(--accent); margin: 0; }
+        .post { background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 30px; overflow: hidden; }
+        .post-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.05); }
+        .post-header h2 { margin: 0; font-size: 1.2rem; }
+        .copy-btn { background: var(--border); color: var(--text); border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .copy-btn:hover { background: var(--accent); color: white; }
+        .copy-btn.copied { background: #2ea043; color: white; }
+        pre[class*="language-"] { margin: 0 !important; border-radius: 0 0 8px 8px !important; border: none !important; }
+    </style>
 </head>
 <body>
     <header>
-        <h1>[ Khối Lưu Trữ Mã Nguồn ]</h1>
+        <h1>[ Kho Script Độc Quyền ]</h1>
         <p>Hệ thống tự động tải từ Firebase</p>
     </header>
 
     <main id="post-container">
-        <p style="text-align: center;" id="loading">Đang tải dữ liệu từ máy chủ...</p>
+        <p id="loading" style="text-align:center;">Đang tải Script từ máy chủ...</p>
     </main>
 
+    <!-- Thư viện tô màu -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-lua.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
-    <!-- Trỏ tới file js mới -->
-    <script src="app.js"></script>
+    
+    <!-- Logic xử lý -->
+    <script>
+        // TRỎ ĐÚNG VÀO FIREBASE CỦA BẠN
+        const DB_URL = "https://noitu-5f24c-default-rtdb.firebaseio.com/posts.json";
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const container = document.getElementById("post-container");
+            const loading = document.getElementById("loading");
+
+            try {
+                const response = await fetch(DB_URL);
+                const data = await response.json();
+
+                if (data) {
+                    loading.remove();
+                    const postsArray = Object.keys(data).map(key => ({ id: key, ...data[key] })).reverse();
+
+                    postsArray.forEach(post => {
+                        const postEl = document.createElement("article");
+                        postEl.className = "post";
+                        postEl.innerHTML = `
+                            <div class="post-header">
+                                <h2>${post.title}</h2>
+                                <button class="copy-btn" data-code="${encodeURIComponent(post.content)}">Copy Script</button>
+                            </div>
+                            <pre><code class="language-${post.language}">${escapeHTML(post.content)}</code></pre>
+                        `;
+                        container.appendChild(postEl);
+                    });
+
+                    Prism.highlightAll(); // Kích hoạt tô màu code
+
+                    // Cài đặt nút Copy
+                    document.querySelectorAll(".copy-btn").forEach(btn => {
+                        btn.addEventListener("click", function() {
+                            const code = decodeURIComponent(this.getAttribute("data-code"));
+                            navigator.clipboard.writeText(code).then(() => {
+                                const oldText = this.innerText;
+                                this.innerText = "Đã Copy ✔️";
+                                this.classList.add("copied");
+                                setTimeout(() => { this.innerText = oldText; this.classList.remove("copied"); }, 2000);
+                            });
+                        });
+                    });
+                } else {
+                    loading.innerText = "Chưa có bài đăng nào trên Server.";
+                }
+            } catch (error) {
+                loading.innerText = "Lỗi kết nối tới Firebase!";
+            }
+        });
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
+        }
+    </script>
 </body>
 </html>
