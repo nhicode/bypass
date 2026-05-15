@@ -1,15 +1,13 @@
-/* --- NỀN VÀ KHUNG TỔNG --- */
+/* --- 1. NỀN TỔNG & ANIMATION XUẤT HIỆN --- */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
     background: transparent !important; 
     color: #1d1d1f;
-    margin: 0;
-    padding: 15px; 
+    margin: 0; padding: 15px; 
     min-height: 100vh;
-    position: relative;
     width: 100vw;
     box-sizing: border-box;
-    overflow-x: hidden !important; /* Khóa chết cuộn ngang của web */
+    overflow-x: hidden !important;
 }
 
 #bg-canvas {
@@ -17,132 +15,126 @@ body {
     z-index: -10; background-color: #f2f2f7; 
 }
 
-.container { 
-    max-width: 800px; margin: 0 auto; padding-bottom: 50px; 
-    position: relative; z-index: 1; 
-    width: 100%; box-sizing: border-box;
+.container { max-width: 800px; margin: 0 auto; padding-bottom: 50px; position: relative; z-index: 1; width: 100%; box-sizing: border-box; }
+header { text-align: center; margin-bottom: 30px; padding-top: 10px; animation: fadeDown 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1.5px; color: #1d1d1f; margin: 0 0 5px 0; text-shadow: 0 4px 15px rgba(255,255,255,0.8); }
+header p { font-size: 1.1rem; color: #515154; margin: 0; font-weight: 500; }
+
+@keyframes fadeDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* --- 2. HIỆU ỨNG LIQUID GLASS ĐỈNH CAO (KÍNH LỎNG 3D) --- */
+.fab-button, .post {
+    /* Độ trong suốt và làm mờ */
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(35px) saturate(180%);
+    -webkit-backdrop-filter: blur(35px) saturate(180%);
+    /* Viền ngoài siêu mỏng */
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    /* BÓNG KÍNH ĐA TẦNG: Đổ bóng ngoài + Viền sáng bên trong tạo độ dày 3D */
+    box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.08), 
+        inset 0 1px 1px rgba(255, 255, 255, 0.8),
+        inset 0 -1px 1px rgba(255, 255, 255, 0.1);
 }
 
-header { text-align: center; margin-bottom: 30px; padding-top: 10px; }
-h1 { font-size: 2.5rem; font-weight: 700; letter-spacing: -1px; color: #1d1d1f; margin: 0 0 5px 0; }
-header p { font-size: 1rem; color: #515154; margin: 0; }
-
-/* --- NÚT ĐĂNG BÀI - LIQUID GLASS --- */
 .fab-button {
     display: block; width: 100%; max-width: 250px; margin: 0 auto 30px auto;
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    color: #0071e3; padding: 14px 24px; border-radius: 30px;
-    font-size: 1.1rem; font-weight: 600; cursor: pointer;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    color: #0071e3; padding: 15px 24px; border-radius: 30px;
+    font-size: 1.1rem; font-weight: 700; cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* Hiệu ứng nảy Spring iOS */
 }
-.fab-button:active { transform: scale(0.95); }
+.fab-button:hover { background: rgba(255, 255, 255, 0.4); transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0, 113, 227, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.8); }
+.fab-button:active { transform: scale(0.92); }
 
-/* --- BÀI ĐĂNG (KHÓA CHẶT CHIỀU NGANG) --- */
 .post {
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    border-radius: 20px; 
-    margin-bottom: 20px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
-    width: 100%; /* Ép bằng chiều ngang màn hình */
-    max-width: 100%;
-    box-sizing: border-box;
-    overflow: hidden; 
+    border-radius: 24px; margin-bottom: 25px; width: 100%; box-sizing: border-box; overflow: hidden;
+    /* CSS Animation xuất hiện cho bài đăng */
+    animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
+/* Hiệu ứng trượt lên khi load trang */
+@keyframes slideUpFade { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
 
+/* --- 3. GIAO DIỆN HEADER BÀI ĐĂNG & NÚT COPY --- */
 .post-header {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 18px 20px; background: transparent; cursor: pointer;
-    transition: background 0.2s;
+    padding: 20px 24px; background: transparent; cursor: pointer;
+    transition: background 0.3s;
 }
-.post-header:active { background: rgba(0,0,0,0.03); }
-.post-header h2 { margin: 0; font-size: 1.2rem; font-weight: 600; flex: 1; word-break: break-word; }
+.post-header:active { background: rgba(0, 0, 0, 0.04); }
+.post-header h2 { margin: 0; font-size: 1.25rem; font-weight: 700; flex: 1; letter-spacing: -0.5px; }
 
-.action-group { display: flex; gap: 10px; align-items: center; z-index: 1; }
+.action-group { display: flex; gap: 12px; align-items: center; z-index: 1; }
 .copy-btn {
-    border: none; padding: 8px 16px; border-radius: 20px;
-    background: #ffffff; color: #0071e3;
-    font-weight: 600; font-size: 0.9rem; cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: transform 0.1s;
+    border: none; padding: 8px 18px; border-radius: 20px;
+    background: rgba(255, 255, 255, 0.6); color: #0071e3;
+    font-weight: 700; font-size: 0.9rem; cursor: pointer;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.copy-btn:active { transform: scale(0.9); }
-.copy-btn.copied { background: #34c759; color: #ffffff; }
+.copy-btn:hover { background: #0071e3; color: white; transform: translateY(-2px); }
+.copy-btn:active { transform: scale(0.85); }
+.copy-btn.copied { background: #34c759; color: #ffffff; transform: scale(1.05); }
 
-/* --- ANIMATION MƯỢT HƠN (CSS GRID TECHNIQUE) --- */
+/* --- 4. CSS GRID ANIMATION (TRƯỢT MƯỢT NHƯ BÔI MỠ) --- */
 .code-wrapper {
     display: grid;
     grid-template-rows: 0fr; 
-    transition: grid-template-rows 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    /* Dùng curve siêu mượt để tạo cảm giác thả dốc nhẹ nhàng */
+    transition: grid-template-rows 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
     width: 100%;
 }
-.code-wrapper.show {
-    grid-template-rows: 1fr; 
-}
+.code-wrapper.show { grid-template-rows: 1fr; }
 .code-content {
-    min-width: 0; /* FIX TRÍ MẠNG 1: Chống Grid giãn ngang vô tận */
-    overflow: hidden; 
-    border-top: 1px solid rgba(0,0,0,0);
-    transition: border-color 0.5s;
-    width: 100%;
+    min-width: 0; overflow: hidden; 
+    border-top: 1px solid transparent;
+    transition: border-color 0.6s; width: 100%;
 }
-.code-wrapper.show .code-content {
-    border-top: 1px solid rgba(0,0,0,0.05); 
-}
+.code-wrapper.show .code-content { border-top: 1px solid rgba(0, 0, 0, 0.06); }
 
-/* --- CHIẾN THẦN ÉP XUỐNG DÒNG (FIX TRÍ MẠNG 2) --- */
-/* Cần tác động trực tiếp lên cả PRE và CODE để trị thư viện PrismJS */
+/* --- 5. GIỮ NGUYÊN CHIẾN THẦN ÉP XUỐNG DÒNG CỦA BẢN TRƯỚC --- */
 pre[class*="language-"] {
-    background: transparent !important; 
-    margin: 0 !important; 
-    padding: 15px 20px 25px 20px !important; 
-    border: none !important;
-    white-space: pre-wrap !important; /* Ép xuống dòng */
-    word-break: break-all !important; /* Cắt chuỗi không có khoảng trắng */
-    overflow-wrap: anywhere !important; 
-    overflow-x: hidden !important; /* Chặn cuộn ngang tuyệt đối */
-    width: 100% !important;
-    box-sizing: border-box !important;
+    background: transparent !important; margin: 0 !important; 
+    padding: 20px 24px 30px 24px !important; border: none !important;
+    white-space: pre-wrap !important; word-break: break-all !important;
+    overflow-wrap: anywhere !important; overflow-x: hidden !important; 
+    width: 100% !important; box-sizing: border-box !important;
 }
-
 code[class*="language-"] {
-    display: block !important; /* FIX TRÍ MẠNG 3: Ép thẻ code thành block để nhận thuộc tính cắt chữ */
-    white-space: pre-wrap !important;
-    word-break: break-all !important;
-    overflow-wrap: anywhere !important;
-    color: #1d1d1f !important;
-    font-size: 0.85rem; /* Thu nhỏ text một chút xíu để dễ nhìn trên mobile */
-    line-height: 1.6;
-    width: 100% !important;
-    box-sizing: border-box !important;
+    display: block !important; white-space: pre-wrap !important; word-break: break-all !important;
+    overflow-wrap: anywhere !important; color: #1d1d1f !important;
+    font-size: 0.85rem; line-height: 1.7; width: 100% !important; box-sizing: border-box !important;
 }
 
-/* --- MODAL POPUP --- */
+/* --- 6. MODAL POPUP (KÍNH CHÀN VIỀN) --- */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
     display: none; justify-content: center; align-items: center; z-index: 1000;
 }
-.modal-overlay.active { display: flex; animation: fadeIn 0.3s forwards; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal-overlay.active { display: flex; animation: fadeInOverlay 0.4s ease forwards; }
+@keyframes fadeInOverlay { from { opacity: 0; } to { opacity: 1; } }
+
 .modal-content {
-    background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(40px) saturate(200%);
-    border: 1px solid rgba(255, 255, 255, 0.7); width: 90%; max-width: 400px;
-    padding: 30px; border-radius: 30px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-    animation: slideUp 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(50px) saturate(200%); -webkit-backdrop-filter: blur(50px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+    width: 90%; max-width: 400px; padding: 35px 30px; border-radius: 36px;
+    animation: popupSpring 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
-@keyframes slideUp { from { transform: translateY(50px) scale(0.9); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-.input-group { margin-bottom: 15px; }
+@keyframes popupSpring { from { transform: translateY(80px) scale(0.8); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+
+.input-group { margin-bottom: 18px; }
 .input-group input, .input-group select, .input-group textarea {
-    width: 100%; box-sizing: border-box; padding: 14px; background: rgba(255,255,255,0.7);
-    border: 1px solid rgba(255,255,255,0.9); border-radius: 15px; font-family: inherit; font-size: 1rem; outline: none;
+    width: 100%; box-sizing: border-box; padding: 16px; 
+    background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.8); 
+    border-radius: 18px; font-family: inherit; font-size: 1rem; outline: none;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.02); transition: all 0.3s;
 }
+.input-group input:focus, .input-group textarea:focus { background: rgba(255,255,255,0.8); border-color: #0071e3; }
 .input-group textarea { height: 160px; }
-.btn-submit { width: 100%; background: #0071e3; color: white; border: none; padding: 15px; border-radius: 15px; font-weight: 600; cursor: pointer; }
-.btn-submit:active { transform: scale(0.95); }
-.btn-close { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.8rem; color: #86868b; cursor: pointer; }
-#error-msg, #post-status { text-align: center; margin-top: 15px; font-weight: 600; }
+.btn-submit { width: 100%; background: #0071e3; color: white; border: none; padding: 16px; border-radius: 18px; font-weight: 700; font-size: 1.05rem; cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 5px 20px rgba(0, 113, 227, 0.3); }
+.btn-submit:active { transform: scale(0.92); }
+.btn-close { position: absolute; top: 20px; right: 25px; background: none; border: none; font-size: 1.8rem; color: #86868b; cursor: pointer; transition: transform 0.2s; }
+.btn-close:active { transform: scale(0.8); }
