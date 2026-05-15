@@ -61,7 +61,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
 
     <script>
-        // --- 1. SCRIPT VẼ HÌNH NỀN ĐỘNG (LIQUID ORBS) ---
+        // --- 1. SCRIPT VẼ HÌNH NỀN ĐỘNG (LIQUID ORBS - FIX LỖI TỐC ĐỘ & ĐỘ SÁNG) ---
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -79,13 +79,16 @@
             orbs.push({
                 x: Math.random() * width, y: Math.random() * height,
                 r: Math.random() * 200 + 150,
-                dx: (Math.random() - 0.5) * 1.5, dy: (Math.random() - 0.5) * 1.5,
+                dx: (Math.random() - 0.5) * 1.0, dy: (Math.random() - 0.5) * 1.0, // Chậm hơn cho iOS
                 color: colors[Math.floor(Math.random() * colors.length)]
             });
         }
 
         function drawBackground() {
-            ctx.clearRect(0, 0, width, height);
+            // FIX: Cập nhật Rule .read true để hiển thị Data
+            ctx.fillStyle = "#f4f5f7"; // Màu lót tối thiểu
+            ctx.fillRect(0, 0, width, height);
+            
             orbs.forEach(orb => {
                 orb.x += orb.dx; orb.y += orb.dy;
                 if (orb.x < -orb.r || orb.x > width + orb.r) orb.dx *= -1;
@@ -122,7 +125,7 @@
                             <div class="post-header" onclick="toggleCode(this)">
                                 <h2>${post.title}</h2>
                                 <div class="action-group">
-                                    <span style="font-size: 0.8rem; color: #515154; margin-right: 5px;">Click</span>
+                                    <span style="font-size: 0.8rem; color: #515154; margin-right: 5px;">View</span>
                                     <button class="copy-btn" data-code="${encodeURIComponent(post.content)}" onclick="event.stopPropagation();">Copy</button>
                                 </div>
                             </div>
@@ -137,8 +140,7 @@
 
                     document.querySelectorAll(".copy-btn").forEach(btn => {
                         btn.addEventListener("click", function(e) {
-                            // Ngăn sự kiện click lan ra ngoài làm header bị click
-                            e.stopPropagation();
+                            e.stopPropagation(); // FIX: Chống click copy kích hoạt mở header
                             const code = decodeURIComponent(this.getAttribute("data-code"));
                             navigator.clipboard.writeText(code).then(() => {
                                 const old = this.innerText;
@@ -149,7 +151,7 @@
                         });
                     });
                 } else {
-                    loading.innerText = "Chưa có bài đăng nào.";
+                    loading.innerText = "Kho dữ liệu trống.";
                 }
             } catch (e) {
                 loading.innerText = "Lỗi kết nối Server.";
@@ -164,12 +166,26 @@
 
         // Script Mở/Đóng code (Sửa lỗi nhận vào header)
         function toggleCode(header) {
-            // Tìm codeBlock từ header cha
-            const codeBlock = header.closest('.post').querySelector('.code-content');
+            const post = header.closest('.post');
+            const codeBlock = post.querySelector('.code-content');
+            
             if (codeBlock.classList.contains('show')) {
+                // Thu gọn
                 codeBlock.classList.remove('show');
+                post.classList.remove('expanded');
             } else {
+                // FIX: Đóng tất cả các bài khác để nhìn bài này cho dễ
+                document.querySelectorAll('.code-content.show').forEach(el => el.classList.remove('show'));
+                document.querySelectorAll('.post.expanded').forEach(el => el.classList.remove('expanded'));
+
+                // Mở rộng full
                 codeBlock.classList.add('show');
+                post.classList.add('expanded');
+                
+                // FIX: Tự động cuộn đến bài được mở cho mượt
+                setTimeout(() => {
+                    post.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
             }
         }
 
