@@ -1,13 +1,15 @@
-/* --- NỀN VÀ KHUNG --- */
+/* --- NỀN VÀ KHUNG TỔNG --- */
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: transparent !important; 
     color: #1d1d1f;
     margin: 0;
-    padding: 15px; /* Giảm padding để có thêm không gian cho code */
+    padding: 15px; 
     min-height: 100vh;
     position: relative;
-    overflow-x: hidden; /* Tắt hẳn cuộn ngang của web */
+    width: 100vw;
+    box-sizing: border-box;
+    overflow-x: hidden !important; /* Khóa chết cuộn ngang của web */
 }
 
 #bg-canvas {
@@ -15,13 +17,17 @@ body {
     z-index: -10; background-color: #f2f2f7; 
 }
 
-.container { max-width: 800px; margin: 0 auto; padding-bottom: 50px; position: relative; z-index: 1; }
+.container { 
+    max-width: 800px; margin: 0 auto; padding-bottom: 50px; 
+    position: relative; z-index: 1; 
+    width: 100%; box-sizing: border-box;
+}
 
 header { text-align: center; margin-bottom: 30px; padding-top: 10px; }
 h1 { font-size: 2.5rem; font-weight: 700; letter-spacing: -1px; color: #1d1d1f; margin: 0 0 5px 0; }
 header p { font-size: 1rem; color: #515154; margin: 0; }
 
-/* NÚT ĐĂNG BÀI - LIQUID GLASS */
+/* --- NÚT ĐĂNG BÀI - LIQUID GLASS --- */
 .fab-button {
     display: block; width: 100%; max-width: 250px; margin: 0 auto 30px auto;
     background: rgba(255, 255, 255, 0.4);
@@ -34,18 +40,19 @@ header p { font-size: 1rem; color: #515154; margin: 0; }
 }
 .fab-button:active { transform: scale(0.95); }
 
-/* --- BÀI ĐĂNG (TỐI ƯU GÓC BO) --- */
+/* --- BÀI ĐĂNG (KHÓA CHẶT CHIỀU NGANG) --- */
 .post {
     background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(40px) saturate(200%);
     -webkit-backdrop-filter: blur(40px) saturate(200%);
     border: 1px solid rgba(255, 255, 255, 0.6);
-    border-radius: 20px; /* Bo góc cong đều */
+    border-radius: 20px; 
     margin-bottom: 20px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
-    width: 100%;
+    width: 100%; /* Ép bằng chiều ngang màn hình */
+    max-width: 100%;
     box-sizing: border-box;
-    overflow: hidden; /* Chặn mọi thứ tràn ra ngoài khung kính */
+    overflow: hidden; 
 }
 
 .post-header {
@@ -54,7 +61,7 @@ header p { font-size: 1rem; color: #515154; margin: 0; }
     transition: background 0.2s;
 }
 .post-header:active { background: rgba(0,0,0,0.03); }
-.post-header h2 { margin: 0; font-size: 1.2rem; font-weight: 600; flex: 1; }
+.post-header h2 { margin: 0; font-size: 1.2rem; font-weight: 600; flex: 1; word-break: break-word; }
 
 .action-group { display: flex; gap: 10px; align-items: center; z-index: 1; }
 .copy-btn {
@@ -69,43 +76,52 @@ header p { font-size: 1rem; color: #515154; margin: 0; }
 /* --- ANIMATION MƯỢT HƠN (CSS GRID TECHNIQUE) --- */
 .code-wrapper {
     display: grid;
-    grid-template-rows: 0fr; /* Chiều cao mặc định = 0 */
-    transition: grid-template-rows 0.5s cubic-bezier(0.25, 1, 0.5, 1); /* Chuyển động lướt siêu mượt */
+    grid-template-rows: 0fr; 
+    transition: grid-template-rows 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    width: 100%;
 }
 .code-wrapper.show {
-    grid-template-rows: 1fr; /* Chiều cao tự động dãn ra mượt mà */
+    grid-template-rows: 1fr; 
 }
 .code-content {
-    overflow: hidden; /* Đóng gói nội dung khi thu gọn */
+    min-width: 0; /* FIX TRÍ MẠNG 1: Chống Grid giãn ngang vô tận */
+    overflow: hidden; 
     border-top: 1px solid rgba(0,0,0,0);
     transition: border-color 0.5s;
+    width: 100%;
 }
 .code-wrapper.show .code-content {
-    border-top: 1px solid rgba(0,0,0,0.05); /* Hiện vạch chia ngang mờ mờ */
+    border-top: 1px solid rgba(0,0,0,0.05); 
 }
 
-/* --- CHIẾN THẦN ÉP XUỐNG DÒNG (FIX LỖI VUỐT NGANG) --- */
-pre[class*="language-"], code[class*="language-"] {
-    white-space: pre-wrap !important;       /* Bắt buộc xuống dòng */
-    word-wrap: break-word !important;       /* Cắt chữ ở khoảng trắng */
-    word-break: break-all !important;       /* ÉP CẮT LUÔN CẢ ĐOẠN CODE DÀI LÒNG THÒNG KO CÓ KHOẢNG TRẮNG */
-    overflow-wrap: anywhere !important; 
-    overflow-x: hidden !important;          /* CHẶN HOÀN TOÀN CUỘN NGANG */
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-}
-
+/* --- CHIẾN THẦN ÉP XUỐNG DÒNG (FIX TRÍ MẠNG 2) --- */
+/* Cần tác động trực tiếp lên cả PRE và CODE để trị thư viện PrismJS */
 pre[class*="language-"] {
     background: transparent !important; 
     margin: 0 !important; 
-    padding: 15px 20px 25px 20px !important; /* Code hiển thị cách lề đều đặn, ko bị che */
+    padding: 15px 20px 25px 20px !important; 
     border: none !important;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    color: #1d1d1f !important;
+    white-space: pre-wrap !important; /* Ép xuống dòng */
+    word-break: break-all !important; /* Cắt chuỗi không có khoảng trắng */
+    overflow-wrap: anywhere !important; 
+    overflow-x: hidden !important; /* Chặn cuộn ngang tuyệt đối */
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
-/* Modal Popup */
+code[class*="language-"] {
+    display: block !important; /* FIX TRÍ MẠNG 3: Ép thẻ code thành block để nhận thuộc tính cắt chữ */
+    white-space: pre-wrap !important;
+    word-break: break-all !important;
+    overflow-wrap: anywhere !important;
+    color: #1d1d1f !important;
+    font-size: 0.85rem; /* Thu nhỏ text một chút xíu để dễ nhìn trên mobile */
+    line-height: 1.6;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* --- MODAL POPUP --- */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
