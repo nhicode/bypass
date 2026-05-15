@@ -3,91 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kho Script Của Admin</title>
-    <!-- Giao diện tối tô màu code -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <title>Góc Lưu Trữ Của Ngân</title>
+    <!-- Thư viện tô màu code (Giao diện dịu mắt) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-twilight.min.css" rel="stylesheet" />
     <style>
-        :root { --bg: #0d1117; --text: #c9d1d9; --card: #161b22; --border: #30363d; --accent: #58a6ff; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 20px; line-height: 1.6; max-width: 800px; margin: auto; }
-        header { text-align: center; border-bottom: 1px solid var(--border); margin-bottom: 20px; padding-bottom: 10px; }
-        h1 { color: var(--accent); margin: 0; }
-        .post { background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 30px; overflow: hidden; }
-        .post-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.05); }
-        .post-header h2 { margin: 0; font-size: 1.2rem; }
-        .copy-btn { background: var(--border); color: var(--text); border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .copy-btn:hover { background: var(--accent); color: white; }
-        .copy-btn.copied { background: #2ea043; color: white; }
-        pre[class*="language-"] { margin: 0 !important; border-radius: 0 0 8px 8px !important; border: none !important; }
+        /* Thiết kế hướng "Human" - Mềm mại, hiện đại */
+        :root { 
+            --bg-body: #f4f4f9; 
+            --bg-card: #ffffff; 
+            --text-main: #333333; 
+            --text-muted: #666666;
+            --accent: #6c5ce7; 
+            --accent-hover: #5a4bcf;
+            --border: #e1e1e8;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background: var(--bg-body); 
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 20px; 
+            line-height: 1.6; 
+        }
+
+        .container { max-width: 750px; margin: 0 auto; }
+
+        header { 
+            text-align: center; 
+            margin-bottom: 40px; 
+            padding-top: 20px;
+        }
+
+        h1 { color: var(--accent); margin: 0 0 10px 0; font-size: 2rem; letter-spacing: -0.5px;}
+        header p { color: var(--text-muted); margin: 0; }
+
+        /* Nút Đăng Bài */
+        .fab-button {
+            display: block; width: 100%; max-width: 250px; margin: 0 auto 30px auto;
+            background: var(--accent); color: white; border: none; 
+            padding: 12px 24px; border-radius: 50px; font-size: 1rem; font-weight: bold;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+            transition: transform 0.2s, background 0.2s;
+        }
+        .fab-button:active { transform: scale(0.95); }
+
+        /* Khung bài viết */
+        .post { 
+            background: var(--bg-card); border-radius: 16px; margin-bottom: 25px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid var(--border);
+        }
+        .post-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 18px 20px; border-bottom: 1px solid var(--border); 
+        }
+        .post-header h2 { margin: 0; font-size: 1.1rem; color: var(--text-main); }
+        .copy-btn { 
+            background: #f0f0f5; color: var(--accent); border: none; 
+            padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; 
+            transition: background 0.2s;
+        }
+        .copy-btn:hover { background: #e0e0ea; }
+        .copy-btn.copied { background: #00b894; color: white; }
+
+        pre[class*="language-"] { margin: 0 !important; border-radius: 0 0 16px 16px !important; border: none !important; font-size: 0.95rem;}
+
+        /* Bảng Popup (Modal) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+            display: none; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: var(--bg-card); width: 90%; max-width: 400px;
+            padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative; animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .modal-title { margin-top: 0; color: var(--accent); text-align: center; }
+        .input-group { margin-bottom: 15px; }
+        .input-group input, .input-group select, .input-group textarea {
+            width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid var(--border);
+            border-radius: 10px; font-family: inherit; font-size: 1rem;
+        }
+        .input-group textarea { height: 150px; resize: vertical; }
+        
+        .btn-submit {
+            width: 100%; background: var(--accent); color: white; border: none;
+            padding: 12px; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer;
+        }
+        .btn-close {
+            position: absolute; top: 15px; right: 20px; background: none; border: none;
+            font-size: 1.5rem; color: var(--text-muted); cursor: pointer;
+        }
+        #error-msg { color: #d63031; text-align: center; font-size: 0.9rem; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
-    <header>
-        <h1>[ Kho Script Độc Quyền ]</h1>
-        <p>Hệ thống tự động tải từ Firebase</p>
-    </header>
+    <div class="container">
+        <header>
+            <h1>✦ Góc Lưu Trữ ✦</h1>
+            <p>Nơi cất giữ những dòng code và ý tưởng</p>
+        </header>
 
-    <main id="post-container">
-        <p id="loading" style="text-align:center;">Đang tải Script từ máy chủ...</p>
-    </main>
+        <button class="fab-button" onclick="openLogin()">+ Đăng Bài Mới</button>
 
-    <!-- Thư viện tô màu -->
+        <main id="post-container">
+            <p id="loading" style="text-align:center; color: var(--text-muted);">Đang kết nối tới máy chủ...</p>
+        </main>
+    </div>
+
+    <!-- Popup Đăng Nhập -->
+    <div class="modal-overlay" id="login-modal">
+        <div class="modal-content">
+            <button class="btn-close" onclick="closeModals()">×</button>
+            <h2 class="modal-title">Xác Minh Danh Tính</h2>
+            <div class="input-group">
+                <input type="text" id="username" placeholder="Tên đăng nhập">
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="Mật khẩu">
+            </div>
+            <button class="btn-submit" onclick="checkLogin()">Mở Khóa</button>
+            <p id="error-msg">Sai tài khoản hoặc mật khẩu!</p>
+        </div>
+    </div>
+
+    <!-- Popup Đăng Bài -->
+    <div class="modal-overlay" id="post-modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <button class="btn-close" onclick="closeModals()">×</button>
+            <h2 class="modal-title">Viết Ý Tưởng Mới</h2>
+            <div class="input-group">
+                <input type="text" id="post-title" placeholder="Tiêu đề...">
+            </div>
+            <div class="input-group">
+                <select id="post-lang">
+                    <option value="lua">Ngôn ngữ: Lua</option>
+                    <option value="javascript">Ngôn ngữ: JavaScript</option>
+                    <option value="cpp">Ngôn ngữ: C++</option>
+                    <option value="csharp">Ngôn ngữ: C#</option>
+                    <option value="none">Văn bản bình thường</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <textarea id="post-content" placeholder="Dán nội dung / script vào đây..."></textarea>
+            </div>
+            <button class="btn-submit" id="submit-post-btn" onclick="submitPost()">Lưu Lên Server</button>
+            <p id="post-status" style="text-align: center; margin-top: 10px;"></p>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-lua.min.js"></script>
-    
-    <!-- Logic xử lý -->
-    <script>
-        // TRỎ ĐÚNG VÀO FIREBASE CỦA BẠN
-        const DB_URL = "https://noitu-5f24c-default-rtdb.firebaseio.com/posts.json";
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
 
-        document.addEventListener("DOMContentLoaded", async () => {
+    <script>
+        // --- CẤU HÌNH BẢO MẬT ---
+        const DB_URL = "https://noitu-5f24c-default-rtdb.firebaseio.com/posts.json";
+        // BẠN PHẢI DÁN MÃ BÍ MẬT DATABASE VÀO GIỮA 2 DẤU NGOẶC KÉP DƯỚI ĐÂY
+        const DB_SECRET = "MÃ_BÍ_MẬT_LẤY_Ở_FIREBASE_SETTINGS"; 
+
+        // Tải danh sách bài
+        async function fetchPosts() {
             const container = document.getElementById("post-container");
             const loading = document.getElementById("loading");
-
             try {
-                const response = await fetch(DB_URL);
-                const data = await response.json();
-
+                const res = await fetch(DB_URL);
+                const data = await res.json();
                 if (data) {
                     loading.remove();
+                    container.innerHTML = ""; // Xóa trắng trước khi render lại
                     const postsArray = Object.keys(data).map(key => ({ id: key, ...data[key] })).reverse();
-
+                    
                     postsArray.forEach(post => {
-                        const postEl = document.createElement("article");
-                        postEl.className = "post";
-                        postEl.innerHTML = `
+                        const article = document.createElement("article");
+                        article.className = "post";
+                        article.innerHTML = `
                             <div class="post-header">
                                 <h2>${post.title}</h2>
-                                <button class="copy-btn" data-code="${encodeURIComponent(post.content)}">Copy Script</button>
+                                <button class="copy-btn" data-code="${encodeURIComponent(post.content)}">Sao Chép</button>
                             </div>
                             <pre><code class="language-${post.language}">${escapeHTML(post.content)}</code></pre>
                         `;
-                        container.appendChild(postEl);
+                        container.appendChild(article);
                     });
+                    
+                    Prism.highlightAll();
 
-                    Prism.highlightAll(); // Kích hoạt tô màu code
-
-                    // Cài đặt nút Copy
                     document.querySelectorAll(".copy-btn").forEach(btn => {
                         btn.addEventListener("click", function() {
                             const code = decodeURIComponent(this.getAttribute("data-code"));
                             navigator.clipboard.writeText(code).then(() => {
-                                const oldText = this.innerText;
-                                this.innerText = "Đã Copy ✔️";
+                                const old = this.innerText;
+                                this.innerText = "Đã Lưu ✔";
                                 this.classList.add("copied");
-                                setTimeout(() => { this.innerText = oldText; this.classList.remove("copied"); }, 2000);
+                                setTimeout(() => { this.innerText = old; this.classList.remove("copied"); }, 2000);
                             });
                         });
                     });
                 } else {
-                    loading.innerText = "Chưa có bài đăng nào trên Server.";
+                    loading.innerText = "Chưa có bài đăng nào.";
                 }
-            } catch (error) {
-                loading.innerText = "Lỗi kết nối tới Firebase!";
+            } catch (e) {
+                loading.innerText = "Không thể kết nối đến máy chủ.";
             }
-        });
+        }
+
+        // Khởi chạy khi web load xong
+        document.addEventListener("DOMContentLoaded", fetchPosts);
 
         function escapeHTML(str) {
             return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
+        }
+
+        // --- XỬ LÝ POPUP ---
+        function openLogin() {
+            document.getElementById("login-modal").classList.add("active");
+            document.getElementById("error-msg").style.display = "none";
+        }
+
+        function closeModals() {
+            document.getElementById("login-modal").classList.remove("active");
+            document.getElementById("post-modal").classList.remove("active");
+        }
+
+        function checkLogin() {
+            const u = document.getElementById("username").value;
+            const p = document.getElementById("password").value;
+            
+            // Đăng nhập tĩnh đúng như yêu cầu
+            if (u === "ngan2311" && p === "123456Hh") {
+                document.getElementById("login-modal").classList.remove("active");
+                document.getElementById("post-modal").classList.add("active");
+                // Reset form nhập code
+                document.getElementById("post-title").value = "";
+                document.getElementById("post-content").value = "";
+                document.getElementById("post-status").innerText = "";
+            } else {
+                document.getElementById("error-msg").style.display = "block";
+            }
+        }
+
+        async function submitPost() {
+            const title = document.getElementById("post-title").value;
+            const language = document.getElementById("post-lang").value;
+            const content = document.getElementById("post-content").value;
+            const btn = document.getElementById("submit-post-btn");
+            const status = document.getElementById("post-status");
+
+            if (!title || !content) {
+                status.innerText = "Vui lòng nhập đủ Tiêu đề và Nội dung!";
+                status.style.color = "#d63031";
+                return;
+            }
+
+            btn.innerText = "Đang tải lên...";
+            btn.disabled = true;
+
+            const postData = { title, language, content, timestamp: Date.now() };
+            // Đẩy kèm mã bí mật để vượt qua tường lửa rules write: false
+            const postUrl = \`https://noitu-5f24c-default-rtdb.firebaseio.com/posts.json?auth=\${DB_SECRET}\`;
+
+            try {
+                const res = await fetch(postUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(postData)
+                });
+
+                if (res.ok) {
+                    status.innerText = "Đăng thành công!";
+                    status.style.color = "#00b894";
+                    setTimeout(() => {
+                        closeModals();
+                        fetchPosts(); // Tải lại danh sách
+                    }, 1000);
+                } else {
+                    status.innerText = "Lỗi: Sai mã bí mật Database!";
+                    status.style.color = "#d63031";
+                }
+            } catch (e) {
+                status.innerText = "Lỗi kết nối mạng!";
+                status.style.color = "#d63031";
+            } finally {
+                btn.innerText = "Lưu Lên Server";
+                btn.disabled = false;
+            }
         }
     </script>
 </body>
