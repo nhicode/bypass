@@ -2,199 +2,27 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Harblx VIP Bypasser</title>
-    <style>
-        /* CSS Giao diện Dark Mode chuẩn chuyên nghiệp */
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            background-color: #0f172a; 
-            color: #f8fafc; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            min-height: 100vh; 
-            margin: 0; 
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .container { 
-            background: #1e293b; 
-            padding: 35px 25px; 
-            border-radius: 16px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6); 
-            width: 100%; 
-            max-width: 480px; 
-            box-sizing: border-box; 
-            text-align: center;
-        }
-        h2 { 
-            margin-top: 0; 
-            color: #38bdf8; 
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-        p.subtitle {
-            color: #94a3b8;
-            font-size: 14px;
-            margin-bottom: 25px;
-        }
-        input[type="url"] { 
-            width: 100%; 
-            padding: 16px; 
-            border-radius: 10px; 
-            border: 1px solid #334155; 
-            background: #0f172a; 
-            color: #ffffff; 
-            margin-bottom: 18px; 
-            box-sizing: border-box; 
-            font-size: 15px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        input[type="url"]:focus { 
-            border-color: #38bdf8; 
-        }
-        button { 
-            width: 100%; 
-            padding: 16px; 
-            background: #0284c7; 
-            color: white; 
-            border: none; 
-            border-radius: 10px; 
-            font-weight: 700; 
-            font-size: 16px;
-            cursor: pointer; 
-            transition: background-color 0.3s, transform 0.1s;
-        }
-        button:hover { 
-            background: #0369a1; 
-        }
-        button:active {
-            transform: scale(0.98);
-        }
-        button:disabled { 
-            background: #475569; 
-            cursor: not-allowed; 
-            transform: none;
-        }
-        #resultBox { 
-            margin-top: 25px; 
-            padding: 18px; 
-            border-radius: 10px; 
-            display: none; 
-            word-wrap: break-word; 
-            text-align: left;
-        }
-        .success { background: #064e3b; border: 1px solid #059669; }
-        .error { background: #450a0a; border: 1px solid #991b1b; }
-        
-        #methodText { font-size: 13px; margin-bottom: 8px; font-weight: 700; }
-        .success #methodText { color: #6ee7b7; }
-        .error #methodText { color: #fca5a5; }
-        
-        a.out-link { 
-            color: #7dd3fc; 
-            font-weight: 700; 
-            text-decoration: none; 
-            display: block; 
-            font-size: 15px;
-            margin-top: 5px;
-            word-break: break-all;
-        }
-        a.out-link:hover { text-decoration: underline; }
-        .err-msg { color: #fecaca; font-size: 14px; line-height: 1.5; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Code Vault</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h2>🚀 Harblx Bypasser</h2>
-        <p class="subtitle">Powered by API Harblx.online</p>
-        
-        <input type="url" id="linkInput" placeholder="Dán link cần bypass vào đây..." autocomplete="off" required>
-        <button id="bypassBtn">Tiến Hành Giải Mã</button>
-        
-        <div id="resultBox">
-            <div id="methodText"></div>
-            <a id="outputLink" class="out-link" href="#" target="_blank"></a>
-            <div id="errOutput" class="err-msg"></div>
-        </div>
-    </div>
+    <header>
+        <h1>[ Khối Lưu Trữ Mã Nguồn ]</h1>
+        <p>Hệ thống tự động tải từ Firebase</p>
+    </header>
 
-    <script>
-        document.getElementById('bypassBtn').addEventListener('click', async () => {
-            const url = document.getElementById('linkInput').value.trim();
-            if (!url) {
-                alert("Vui lòng nhập link trước khi bấm!");
-                return;
-            }
+    <main id="post-container">
+        <p style="text-align: center;" id="loading">Đang tải dữ liệu từ máy chủ...</p>
+    </main>
 
-            // Tham chiếu các phần tử UI
-            const btn = document.getElementById('bypassBtn');
-            const resBox = document.getElementById('resultBox');
-            const outputLink = document.getElementById('outputLink');
-            const errOutput = document.getElementById('errOutput');
-            const methodText = document.getElementById('methodText');
-            
-            // Đặt trạng thái Loading
-            btn.disabled = true;
-            btn.innerText = "Đang kết nối API Harblx...";
-            resBox.style.display = 'none';
-            resBox.className = '';
-            outputLink.innerText = '';
-            errOutput.innerText = '';
-
-            try {
-                // Đóng gói URL và gọi thẳng vào API của harblx.online
-                // Cấu trúc API mặc định: https://harblx.online/api/bypass?url=...&key=...
-                const API_KEY = "hanhlenam";
-                const encodedUrl = encodeURIComponent(url);
-                const apiUrl = `https://harblx.online/api/bypass?url=${encodedUrl}&key=${API_KEY}`;
-                
-                const response = await fetch(apiUrl);
-                
-                if (!response.ok) {
-                    throw new Error(`Máy chủ trả về mã lỗi: ${response.status}`);
-                }
-
-                const data = await response.json();
-
-                // Quét qua các thuộc tính JSON phổ biến mà API thường trả về để tìm link đích
-                const finalLink = data.result || data.destination || data.bypassed_link || data.bypassed || data.url;
-
-                resBox.style.display = 'block';
-
-                if (finalLink && (data.success !== false)) {
-                    resBox.classList.add('success');
-                    methodText.innerText = "✅ Giải mã thành công!";
-                    outputLink.innerText = finalLink;
-                    outputLink.href = finalLink;
-                    outputLink.style.display = 'block';
-                    errOutput.style.display = 'none';
-                } else {
-                    // Nếu API trả về thành công giả (chứa thông báo lỗi bên trong JSON)
-                    resBox.classList.add('error');
-                    methodText.innerText = "❌ Lỗi Từ Hệ Thống Harblx";
-                    errOutput.innerText = data.message || data.error || "API không thể giải mã liên kết này hoặc API Key đã hết hạn.";
-                    errOutput.style.display = 'block';
-                    outputLink.style.display = 'none';
-                }
-
-            } catch (error) {
-                // Xử lý lỗi mạng (CORS, rớt mạng, sập server)
-                resBox.style.display = 'block';
-                resBox.classList.add('error');
-                methodText.innerText = "❌ Lỗi Kết Nối Mạng";
-                errOutput.innerText = `Không thể gọi API. Chi tiết: ${error.message}`;
-                errOutput.style.display = 'block';
-                outputLink.style.display = 'none';
-            } finally {
-                // Phục hồi nút bấm
-                btn.disabled = false;
-                btn.innerText = "Tiến Hành Giải Mã";
-            }
-        });
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-lua.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <!-- Trỏ tới file js mới -->
+    <script src="app.js"></script>
 </body>
 </html>
