@@ -3,69 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Góc Lưu Trữ Của Ngân</title>
-    <!-- Giao diện tô màu code nền sáng, chuẩn sạch sẽ -->
+    <title>Code</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
-    <!-- Gọi file CSS chứa giao diện Glassmorphism -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Khung vẽ hình nền động bằng Script JS -->
+    <canvas id="bg-canvas"></canvas>
+
     <div class="container">
         <header>
-            <h1>Kho Script Của Ngân</h1>
-            <p>Hệ thống tự động lưu trữ trên Cloud</p>
+            <h1>Code</h1>
+            <p>Kho lưu trữ Script cá nhân</p>
         </header>
 
-        <!-- Nút mở Popup -->
         <button class="fab-button" onclick="openLogin()">+ Viết Script Mới</button>
 
         <main id="post-container">
-            <p id="loading" style="text-align:center;">Đang tải dữ liệu, vui lòng chờ...</p>
+            <p id="loading" style="text-align:center;">Đang tải dữ liệu từ Server...</p>
         </main>
     </div>
 
-    <!-- Popup Đăng Nhập -->
+    <!-- Bảng Đăng Nhập -->
     <div class="modal-overlay" id="login-modal">
         <div class="modal-content">
             <button class="btn-close" onclick="closeModals()">×</button>
-            <h2 class="modal-title">Xác Minh Danh Tính</h2>
-            <div class="input-group">
-                <input type="text" id="username" placeholder="Tên đăng nhập">
-            </div>
-            <div class="input-group">
-                <input type="password" id="password" placeholder="Mật khẩu">
-            </div>
-            <button class="btn-submit" onclick="checkLogin()">Mở Khóa Cổng Đăng</button>
+            <h2 class="modal-title">Xác Minh</h2>
+            <div class="input-group"><input type="text" id="username" placeholder="Tên đăng nhập"></div>
+            <div class="input-group"><input type="password" id="password" placeholder="Mật khẩu"></div>
+            <button class="btn-submit" onclick="checkLogin()">Mở Khóa</button>
             <p id="error-msg">Sai tài khoản hoặc mật khẩu!</p>
         </div>
     </div>
 
-    <!-- Popup Đăng Bài -->
+    <!-- Bảng Đăng Code -->
     <div class="modal-overlay" id="post-modal">
         <div class="modal-content">
             <button class="btn-close" onclick="closeModals()">×</button>
-            <h2 class="modal-title">Lưu Script Lên Server</h2>
-            <div class="input-group">
-                <input type="text" id="post-title" placeholder="Tiêu đề script...">
-            </div>
+            <h2 class="modal-title">Lưu Script</h2>
+            <div class="input-group"><input type="text" id="post-title" placeholder="Tiêu đề..."></div>
             <div class="input-group">
                 <select id="post-lang">
-                    <option value="lua">Ngôn ngữ: Lua</option>
-                    <option value="javascript">Ngôn ngữ: JavaScript</option>
-                    <option value="cpp">Ngôn ngữ: C++</option>
-                    <option value="csharp">Ngôn ngữ: C#</option>
+                    <option value="lua">Lua</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="cpp">C++</option>
+                    <option value="csharp">C#</option>
                     <option value="none">Văn bản thuần túy</option>
                 </select>
             </div>
-            <div class="input-group">
-                <textarea id="post-content" placeholder="Dán nội dung script của bạn vào đây (Sẽ hiển thị trên nền trắng)..."></textarea>
-            </div>
-            <button class="btn-submit" id="submit-post-btn" onclick="submitPost()">Đẩy Dữ Liệu</button>
+            <div class="input-group"><textarea id="post-content" placeholder="Dán Script vào đây..."></textarea></div>
+            <button class="btn-submit" id="submit-post-btn" onclick="submitPost()">Lưu Lên Cloud</button>
             <p id="post-status"></p>
         </div>
     </div>
 
-    <!-- Thư viện tô màu (Xử lý các ngôn ngữ lập trình) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-lua.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
@@ -73,6 +64,48 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
 
     <script>
+        // --- 1. SCRIPT VẼ HÌNH NỀN ĐỘNG (LIQUID ORBS) ---
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const orbs = [];
+        const colors = ['#e0c3fc', '#8ec5fc', '#ff9a9e', '#fecfef']; // Bảng màu iOS sáng
+        for (let i = 0; i < 8; i++) {
+            orbs.push({
+                x: Math.random() * width, y: Math.random() * height,
+                r: Math.random() * 200 + 150,
+                dx: (Math.random() - 0.5) * 1.5, dy: (Math.random() - 0.5) * 1.5,
+                color: colors[Math.floor(Math.random() * colors.length)]
+            });
+        }
+
+        function drawBackground() {
+            ctx.clearRect(0, 0, width, height);
+            orbs.forEach(orb => {
+                orb.x += orb.dx; orb.y += orb.dy;
+                // Bật lại nếu đập viền
+                if (orb.x < -orb.r || orb.x > width + orb.r) orb.dx *= -1;
+                if (orb.y < -orb.r || orb.y > height + orb.r) orb.dy *= -1;
+
+                const grad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.r);
+                grad.addColorStop(0, orb.color);
+                grad.addColorStop(1, 'rgba(255,255,255,0)');
+                ctx.fillStyle = grad;
+                ctx.fill();
+            });
+            requestAnimationFrame(drawBackground);
+        }
+        drawBackground(); // Khởi chạy nền động
+
+        // --- 2. LOGIC DATABASE VÀ HIỂN THỊ WEB ---
         const DB_URL = "https://noitu-5f24c-default-rtdb.firebaseio.com/posts.json";
 
         async function fetchPosts() {
@@ -92,9 +125,14 @@
                         article.innerHTML = `
                             <div class="post-header">
                                 <h2>${post.title}</h2>
-                                <button class="copy-btn" data-code="${encodeURIComponent(post.content)}">Sao Chép</button>
+                                <div class="action-group">
+                                    <button class="toggle-btn" onclick="toggleCode(this)">Xem Script</button>
+                                    <button class="copy-btn" data-code="${encodeURIComponent(post.content)}">Copy</button>
+                                </div>
                             </div>
-                            <pre><code class="language-${post.language}">${escapeHTML(post.content)}</code></pre>
+                            <div class="code-content">
+                                <pre><code class="language-${post.language}">${escapeHTML(post.content)}</code></pre>
+                            </div>
                         `;
                         container.appendChild(article);
                     });
@@ -113,10 +151,10 @@
                         });
                     });
                 } else {
-                    loading.innerText = "Kho dữ liệu trống.";
+                    loading.innerText = "Chưa có bài đăng nào.";
                 }
             } catch (e) {
-                loading.innerText = "Lỗi kết nối tới Server.";
+                loading.innerText = "Lỗi kết nối Server.";
             }
         }
 
@@ -126,26 +164,26 @@
             return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
         }
 
-        function openLogin() {
-            document.getElementById("login-modal").classList.add("active");
-            document.getElementById("error-msg").style.display = "none";
+        // Script Mở/Đóng code
+        function toggleCode(btn) {
+            const codeBlock = btn.closest('.post').querySelector('.code-content');
+            if (codeBlock.classList.contains('show')) {
+                codeBlock.classList.remove('show');
+                btn.innerText = "Xem Script";
+            } else {
+                codeBlock.classList.add('show');
+                btn.innerText = "Thu Gọn";
+            }
         }
 
-        function closeModals() {
-            document.getElementById("login-modal").classList.remove("active");
-            document.getElementById("post-modal").classList.remove("active");
-        }
+        function openLogin() { document.getElementById("login-modal").classList.add("active"); document.getElementById("error-msg").style.display = "none"; }
+        function closeModals() { document.getElementById("login-modal").classList.remove("active"); document.getElementById("post-modal").classList.remove("active"); }
 
         function checkLogin() {
-            const u = document.getElementById("username").value;
-            const p = document.getElementById("password").value;
-            
-            if (u === "ngan2311" && p === "123456Hh") {
+            if (document.getElementById("username").value === "ngan2311" && document.getElementById("password").value === "123456Hh") {
                 document.getElementById("login-modal").classList.remove("active");
                 document.getElementById("post-modal").classList.add("active");
-                document.getElementById("post-title").value = "";
-                document.getElementById("post-content").value = "";
-                document.getElementById("post-status").innerText = "";
+                document.getElementById("post-title").value = ""; document.getElementById("post-content").value = ""; document.getElementById("post-status").innerText = "";
             } else {
                 document.getElementById("error-msg").style.display = "block";
             }
@@ -158,42 +196,17 @@
             const btn = document.getElementById("submit-post-btn");
             const status = document.getElementById("post-status");
 
-            if (!title || !content) {
-                status.innerText = "Vui lòng nhập đủ thông tin!";
-                status.style.color = "#ff3b30";
-                return;
-            }
-
-            btn.innerText = "Đang xử lý...";
-            btn.disabled = true;
-
-            const postData = { title, language, content, timestamp: Date.now() };
+            if (!title || !content) { status.innerText = "Nhập đủ thông tin!"; status.style.color = "#ff3b30"; return; }
+            btn.innerText = "Đang xử lý..."; btn.disabled = true;
 
             try {
-                const res = await fetch(DB_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(postData)
-                });
-
+                const res = await fetch(DB_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title, language, content, timestamp: Date.now() }) });
                 if (res.ok) {
-                    status.innerText = "Tải lên thành công!";
-                    status.style.color = "#34c759";
-                    setTimeout(() => {
-                        closeModals();
-                        fetchPosts();
-                    }, 1000);
-                } else {
-                    status.innerText = "Lỗi Server!";
-                    status.style.color = "#ff3b30";
-                }
-            } catch (e) {
-                status.innerText = "Lỗi kết nối mạng!";
-                status.style.color = "#ff3b30";
-            } finally {
-                btn.innerText = "Đẩy Dữ Liệu";
-                btn.disabled = false;
-            }
+                    status.innerText = "Tải lên thành công!"; status.style.color = "#34c759";
+                    setTimeout(() => { closeModals(); fetchPosts(); }, 1000);
+                } else { status.innerText = "Lỗi Server!"; status.style.color = "#ff3b30"; }
+            } catch (e) { status.innerText = "Lỗi mạng!"; status.style.color = "#ff3b30"; } 
+            finally { btn.innerText = "Lưu Lên Cloud"; btn.disabled = false; }
         }
     </script>
 </body>
