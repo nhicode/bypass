@@ -19,25 +19,25 @@
         <button class="fab-button" onclick="openLogin()">+ Viết Script Mới</button>
 
         <main id="post-container">
-            <p id="loading" style="text-align:center;">Đang tải dữ liệu từ Server...</p>
+            <p id="loading" style="text-align:center;">Đang tải dữ liệu...</p>
         </main>
     </div>
 
     <div class="modal-overlay" id="login-modal">
         <div class="modal-content">
             <button class="btn-close" onclick="closeModals()">×</button>
-            <h2 class="modal-title">Xác Minh</h2>
+            <h2 style="text-align: center; margin-top:0;">Xác Minh</h2>
             <div class="input-group"><input type="text" id="username" placeholder="Tên đăng nhập"></div>
             <div class="input-group"><input type="password" id="password" placeholder="Mật khẩu"></div>
             <button class="btn-submit" onclick="checkLogin()">Mở Khóa</button>
-            <p id="error-msg">Sai tài khoản hoặc mật khẩu!</p>
+            <p id="error-msg" style="color: #ff3b30; display:none;">Sai tài khoản hoặc mật khẩu!</p>
         </div>
     </div>
 
     <div class="modal-overlay" id="post-modal">
         <div class="modal-content">
             <button class="btn-close" onclick="closeModals()">×</button>
-            <h2 class="modal-title">Lưu Script</h2>
+            <h2 style="text-align: center; margin-top:0;">Lưu Script</h2>
             <div class="input-group"><input type="text" id="post-title" placeholder="Tiêu đề..."></div>
             <div class="input-group">
                 <select id="post-lang">
@@ -61,7 +61,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
 
     <script>
-        // --- 1. SCRIPT VẼ HÌNH NỀN ĐỘNG (LIQUID ORBS - FIX LỖI TỐC ĐỘ & ĐỘ SÁNG) ---
+        // 1. SCRIPT NỀN ĐỘNG (FIX TỐC ĐỘ: RẤT CHẬM VÀ MƯỢT NHƯ NHỊP THỞ IOS)
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -74,19 +74,20 @@
         resizeCanvas();
 
         const orbs = [];
-        const colors = ['#e0c3fc', '#8ec5fc', '#ff9a9e', '#fecfef']; // Bảng màu iOS sáng
-        for (let i = 0; i < 8; i++) {
+        const colors = ['#e2c6ff', '#a8c0ff', '#ffb1c0', '#ffe4f2'];
+        for (let i = 0; i < 7; i++) {
             orbs.push({
                 x: Math.random() * width, y: Math.random() * height,
-                r: Math.random() * 200 + 150,
-                dx: (Math.random() - 0.5) * 1.0, dy: (Math.random() - 0.5) * 1.0, // Chậm hơn cho iOS
+                r: Math.random() * 250 + 150,
+                // Tốc độ di chuyển cực chậm tạo cảm giác bồng bềnh
+                dx: (Math.random() - 0.5) * 0.4, 
+                dy: (Math.random() - 0.5) * 0.4,
                 color: colors[Math.floor(Math.random() * colors.length)]
             });
         }
 
         function drawBackground() {
-            // FIX: Cập nhật Rule .read true để hiển thị Data
-            ctx.fillStyle = "#f4f5f7"; // Màu lót tối thiểu
+            ctx.fillStyle = "#f2f2f7"; 
             ctx.fillRect(0, 0, width, height);
             
             orbs.forEach(orb => {
@@ -102,9 +103,9 @@
             });
             requestAnimationFrame(drawBackground);
         }
-        drawBackground(); // Khởi chạy nền động
+        drawBackground();
 
-        // --- 2. LOGIC DATABASE VÀ HIỂN THỊ WEB ---
+        // 2. FETCH DATA VÀ TẠO GIAO DIỆN MƯỢT MÀ
         const DB_URL = "https://noitu-5f24c-default-rtdb.firebaseio.com/posts.json";
 
         async function fetchPosts() {
@@ -121,16 +122,19 @@
                     postsArray.forEach(post => {
                         const article = document.createElement("article");
                         article.className = "post";
+                        // Cấu trúc HTML được bọc bằng code-wrapper để animation mượt nhất
                         article.innerHTML = `
                             <div class="post-header" onclick="toggleCode(this)">
                                 <h2>${post.title}</h2>
                                 <div class="action-group">
-                                    <span style="font-size: 0.8rem; color: #515154; margin-right: 5px;">View</span>
+                                    <span style="font-size: 0.8rem; color: #86868b; margin-right: 2px;">View</span>
                                     <button class="copy-btn" data-code="${encodeURIComponent(post.content)}" onclick="event.stopPropagation();">Copy</button>
                                 </div>
                             </div>
-                            <div class="code-content">
-                                <pre><code class="language-${post.language}">${escapeHTML(post.content)}</code></pre>
+                            <div class="code-wrapper">
+                                <div class="code-content">
+                                    <pre><code class="language-${post.language}">${escapeHTML(post.content)}</code></pre>
+                                </div>
                             </div>
                         `;
                         container.appendChild(article);
@@ -140,7 +144,7 @@
 
                     document.querySelectorAll(".copy-btn").forEach(btn => {
                         btn.addEventListener("click", function(e) {
-                            e.stopPropagation(); // FIX: Chống click copy kích hoạt mở header
+                            e.stopPropagation(); 
                             const code = decodeURIComponent(this.getAttribute("data-code"));
                             navigator.clipboard.writeText(code).then(() => {
                                 const old = this.innerText;
@@ -151,7 +155,7 @@
                         });
                     });
                 } else {
-                    loading.innerText = "Kho dữ liệu trống.";
+                    loading.innerText = "Chưa có Script nào.";
                 }
             } catch (e) {
                 loading.innerText = "Lỗi kết nối Server.";
@@ -164,28 +168,25 @@
             return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
         }
 
-        // Script Mở/Đóng code (Sửa lỗi nhận vào header)
+        // SCRIPT MỞ ĐÓNG MƯỢT MÀ BẰNG CLASS "SHOW"
         function toggleCode(header) {
             const post = header.closest('.post');
-            const codeBlock = post.querySelector('.code-content');
+            const wrapper = post.querySelector('.code-wrapper');
             
-            if (codeBlock.classList.contains('show')) {
-                // Thu gọn
-                codeBlock.classList.remove('show');
-                post.classList.remove('expanded');
+            if (wrapper.classList.contains('show')) {
+                // Nếu đang mở -> Thu lại
+                wrapper.classList.remove('show');
             } else {
-                // FIX: Đóng tất cả các bài khác để nhìn bài này cho dễ
-                document.querySelectorAll('.code-content.show').forEach(el => el.classList.remove('show'));
-                document.querySelectorAll('.post.expanded').forEach(el => el.classList.remove('expanded'));
-
-                // Mở rộng full
-                codeBlock.classList.add('show');
-                post.classList.add('expanded');
+                // Thu gọn tất cả các bài khác để giao diện gọn gàng
+                document.querySelectorAll('.code-wrapper.show').forEach(el => el.classList.remove('show'));
                 
-                // FIX: Tự động cuộn đến bài được mở cho mượt
+                // Trượt mượt mở bài này ra
+                wrapper.classList.add('show');
+                
+                // Đợi animation trượt xong (khoảng 300ms) rồi tự động cuộn màn hình tới giữa bài đăng
                 setTimeout(() => {
-                    post.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 100);
+                    post.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
             }
         }
 
