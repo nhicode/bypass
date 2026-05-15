@@ -4,62 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Góc Lưu Trữ Của Ngân</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-twilight.min.css" rel="stylesheet" />
-    <style>
-        :root { 
-            --bg-body: #f4f4f9; --bg-card: #ffffff; --text-main: #333333; 
-            --text-muted: #666666; --accent: #6c5ce7; --border: #e1e1e8;
-        }
-        body { font-family: sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; padding: 20px; }
-        .container { max-width: 750px; margin: 0 auto; }
-        header { text-align: center; margin-bottom: 30px; }
-        h1 { color: var(--accent); margin: 0; }
-        
-        .fab-button {
-            display: block; width: 100%; max-width: 250px; margin: 0 auto 30px auto;
-            background: var(--accent); color: white; border: none; 
-            padding: 12px; border-radius: 50px; font-weight: bold; cursor: pointer;
-        }
-        
-        .post { background: var(--bg-card); border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border); overflow: hidden; }
-        .post-header { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid var(--border); }
-        .post-header h2 { margin: 0; font-size: 1.1rem; }
-        .copy-btn { background: #f0f0f5; color: var(--accent); border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .copy-btn.copied { background: #00b894; color: white; }
-        pre[class*="language-"] { margin: 0 !important; border-radius: 0 0 12px 12px !important; border: none !important; }
-
-        /* Khung Popup */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000;
-        }
-        .modal-overlay.active { display: flex; }
-        .modal-content {
-            background: var(--bg-card); width: 90%; max-width: 400px; padding: 25px; 
-            border-radius: 16px; position: relative;
-        }
-        .input-group { margin-bottom: 15px; }
-        .input-group input, .input-group select, .input-group textarea {
-            width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid var(--border); border-radius: 8px;
-        }
-        .input-group textarea { height: 150px; }
-        .btn-submit { width: 100%; background: var(--accent); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .btn-close { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999; }
-        #error-msg { color: red; text-align: center; display: none; margin-top: 10px; }
-    </style>
+    <!-- Giao diện tô màu code nền sáng, chuẩn sạch sẽ -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+    <!-- Gọi file CSS chứa giao diện Glassmorphism -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>✦ Góc Lưu Trữ ✦</h1>
-            <p>Nơi cất giữ Script</p>
+            <h1>Kho Script Của Ngân</h1>
+            <p>Hệ thống tự động lưu trữ trên Cloud</p>
         </header>
 
         <!-- Nút mở Popup -->
-        <button class="fab-button" onclick="openLogin()">+ Đăng Bài Mới</button>
+        <button class="fab-button" onclick="openLogin()">+ Viết Script Mới</button>
 
         <main id="post-container">
-            <p id="loading" style="text-align:center;">Đang kết nối tới máy chủ...</p>
+            <p id="loading" style="text-align:center;">Đang tải dữ liệu, vui lòng chờ...</p>
         </main>
     </div>
 
@@ -67,43 +28,44 @@
     <div class="modal-overlay" id="login-modal">
         <div class="modal-content">
             <button class="btn-close" onclick="closeModals()">×</button>
-            <h2 style="color: var(--accent); text-align: center; margin-top: 0;">Xác Minh</h2>
+            <h2 class="modal-title">Xác Minh Danh Tính</h2>
             <div class="input-group">
-                <input type="text" id="username" placeholder="Tài khoản">
+                <input type="text" id="username" placeholder="Tên đăng nhập">
             </div>
             <div class="input-group">
                 <input type="password" id="password" placeholder="Mật khẩu">
             </div>
-            <button class="btn-submit" onclick="checkLogin()">Đăng Nhập</button>
+            <button class="btn-submit" onclick="checkLogin()">Mở Khóa Cổng Đăng</button>
             <p id="error-msg">Sai tài khoản hoặc mật khẩu!</p>
         </div>
     </div>
 
     <!-- Popup Đăng Bài -->
     <div class="modal-overlay" id="post-modal">
-        <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-content">
             <button class="btn-close" onclick="closeModals()">×</button>
-            <h2 style="color: var(--accent); text-align: center; margin-top: 0;">Viết Bài</h2>
+            <h2 class="modal-title">Lưu Script Lên Server</h2>
             <div class="input-group">
-                <input type="text" id="post-title" placeholder="Tiêu đề...">
+                <input type="text" id="post-title" placeholder="Tiêu đề script...">
             </div>
             <div class="input-group">
                 <select id="post-lang">
-                    <option value="lua">Lua</option>
-                    <option value="javascript">JavaScript</option>
-                    <option value="cpp">C++</option>
-                    <option value="csharp">C#</option>
-                    <option value="none">Văn bản bình thường</option>
+                    <option value="lua">Ngôn ngữ: Lua</option>
+                    <option value="javascript">Ngôn ngữ: JavaScript</option>
+                    <option value="cpp">Ngôn ngữ: C++</option>
+                    <option value="csharp">Ngôn ngữ: C#</option>
+                    <option value="none">Văn bản thuần túy</option>
                 </select>
             </div>
             <div class="input-group">
-                <textarea id="post-content" placeholder="Dán nội dung script..."></textarea>
+                <textarea id="post-content" placeholder="Dán nội dung script của bạn vào đây (Sẽ hiển thị trên nền trắng)..."></textarea>
             </div>
-            <button class="btn-submit" id="submit-post-btn" onclick="submitPost()">Đẩy Lên Server</button>
-            <p id="post-status" style="text-align: center; margin-top: 10px; font-weight: bold;"></p>
+            <button class="btn-submit" id="submit-post-btn" onclick="submitPost()">Đẩy Dữ Liệu</button>
+            <p id="post-status"></p>
         </div>
     </div>
 
+    <!-- Thư viện tô màu (Xử lý các ngôn ngữ lập trình) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-lua.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
@@ -113,7 +75,6 @@
     <script>
         const DB_URL = "https://noitu-5f24c-default-rtdb.firebaseio.com/posts.json";
 
-        // Tải danh sách bài
         async function fetchPosts() {
             const container = document.getElementById("post-container");
             const loading = document.getElementById("loading");
@@ -131,7 +92,7 @@
                         article.innerHTML = `
                             <div class="post-header">
                                 <h2>${post.title}</h2>
-                                <button class="copy-btn" data-code="${encodeURIComponent(post.content)}">Copy</button>
+                                <button class="copy-btn" data-code="${encodeURIComponent(post.content)}">Sao Chép</button>
                             </div>
                             <pre><code class="language-${post.language}">${escapeHTML(post.content)}</code></pre>
                         `;
@@ -152,10 +113,10 @@
                         });
                     });
                 } else {
-                    loading.innerText = "Chưa có bài đăng nào.";
+                    loading.innerText = "Kho dữ liệu trống.";
                 }
             } catch (e) {
-                loading.innerText = "Lỗi kết nối Server.";
+                loading.innerText = "Lỗi kết nối tới Server.";
             }
         }
 
@@ -165,7 +126,6 @@
             return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
         }
 
-        // --- XỬ LÝ POPUP ---
         function openLogin() {
             document.getElementById("login-modal").classList.add("active");
             document.getElementById("error-msg").style.display = "none";
@@ -200,17 +160,16 @@
 
             if (!title || !content) {
                 status.innerText = "Vui lòng nhập đủ thông tin!";
-                status.style.color = "red";
+                status.style.color = "#ff3b30";
                 return;
             }
 
-            btn.innerText = "Đang tải lên...";
+            btn.innerText = "Đang xử lý...";
             btn.disabled = true;
 
             const postData = { title, language, content, timestamp: Date.now() };
 
             try {
-                // Đẩy thẳng lên không cần auth (Yêu cầu Rule .write: true)
                 const res = await fetch(DB_URL, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -218,21 +177,21 @@
                 });
 
                 if (res.ok) {
-                    status.innerText = "Đã đẩy lên Server!";
-                    status.style.color = "green";
+                    status.innerText = "Tải lên thành công!";
+                    status.style.color = "#34c759";
                     setTimeout(() => {
                         closeModals();
                         fetchPosts();
                     }, 1000);
                 } else {
-                    status.innerText = "Lỗi Server từ chối!";
-                    status.style.color = "red";
+                    status.innerText = "Lỗi Server!";
+                    status.style.color = "#ff3b30";
                 }
             } catch (e) {
                 status.innerText = "Lỗi kết nối mạng!";
-                status.style.color = "red";
+                status.style.color = "#ff3b30";
             } finally {
-                btn.innerText = "Đẩy Lên Server";
+                btn.innerText = "Đẩy Dữ Liệu";
                 btn.disabled = false;
             }
         }
